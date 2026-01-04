@@ -20,6 +20,8 @@ from waveshare_epd import epd7in3f  # 7.3" tri-color display
 
 # Path to your synced iCloud photos
 PHOTO_DIR = "/home/justin/photos"
+# Edited photos sibling folder
+EDITED_DIR = os.path.join(os.path.dirname(PHOTO_DIR), os.path.basename(PHOTO_DIR) + "-edited")
 
 # Initialize the display
 epd = epd7in3f.EPD()
@@ -37,10 +39,16 @@ if not images:
     epd.sleep()
     exit()
 
-# Pick a random image
+# Pick a random image filename
 random.seed(time.time_ns())
-image_path = os.path.join(PHOTO_DIR, random.choice(images))
-print("Displaying:", image_path)
+chosen = random.choice(images)
+
+# Prefer edited image if it exists
+edited_path = os.path.join(EDITED_DIR, chosen)
+orig_path = os.path.join(PHOTO_DIR, chosen)
+image_path = edited_path if os.path.exists(edited_path) else orig_path
+with open(log_file, "a") as f:
+    f.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - Displaying: {image_path}\n")
 
 # Open the image
 img = Image.open(image_path)
