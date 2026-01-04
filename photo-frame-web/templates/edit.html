@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <link href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css" rel="stylesheet"/>
+    <style>
+        img { max-width: 100%; display: block; margin: auto; }
+        .controls { text-align: center; margin-top: 10px; }
+    </style>
+
+    <h2>Edit Photo</h2>
+    <span class="text-xs truncate">name: {{ filename }}</span>
+    <span class="text-xs truncate">hash: {{ filename|hash }}</span>
+    <img id="photo" src="{{ image_url }}">
+    <div class="controls">
+        <form method="POST" action="{{ url_for('edit', filename=filename) }}" style="display:inline;">
+            <input type="hidden" name="action" value="rotate">
+            <input type="hidden" name="rotate" value="-90">
+            <button type="submit">Rotate -90</button>
+        </form>
+
+        <form method="POST" action="{{ url_for('edit', filename=filename) }}" style="display:inline; margin-left:6px;">
+            <input type="hidden" name="action" value="rotate">
+            <input type="hidden" name="rotate" value="90">
+            <button type="submit">Rotate +90</button>
+        </form>
+
+        <form method="post" action="{{ url_for('revert', filename=filename) }}" style="display:inline; margin-left:8px;" onsubmit="return confirm('Revert to original? This will delete the edited copy.');">
+            <button type="submit">Revert to original</button>
+        </form>
+
+        <form id="edit-form" method="POST" style="display:inline; margin-left:8px;">
+            <input type="hidden" name="action" value="crop">
+            <input type="hidden" name="x">
+            <input type="hidden" name="y">
+            <input type="hidden" name="width">
+            <input type="hidden" name="height">
+            <button type="submit">Crop</button>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
+    <script>
+        const image = document.getElementById('photo');
+        const form = document.getElementById('edit-form');
+
+        const cropper = new Cropper(image, {
+            aspectRatio: 800/480,
+            viewMode: 1,
+        });
+
+        // When submitting crop form, populate crop coordinates then submit.
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const data = cropper.getData();
+            form.x.value = data.x;
+            form.y.value = data.y;
+            form.width.value = data.width;
+            form.height.value = data.height;
+            form.submit();
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+  {% for img in images %}
+  <div class="bg-white rounded shadow p-2">
+    <img
+      src="{{ url_for('static', filename='thumbnails/' + img|hash + '.png') }}"
+      class="w-full object-contain bg-gray-200"
+    >
+    <div class="flex justify-between mt-1">
+      <a href="{{ url_for('edit', filename=img) }}">Edit</a>
+      <a
+        href="{{ url_for('delete', filename=img) }}"
+        class="text-red-600 text-xs hover:underline"
+        onclick="return confirm('Delete this photo?')"
+      >Delete</a>
+  </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}
