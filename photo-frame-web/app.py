@@ -1,4 +1,5 @@
 from flask import Flask, render_template, redirect, url_for, send_from_directory, request, jsonify
+from flask import send_file
 from PIL import Image, ImageOps
 import os
 import hashlib
@@ -87,6 +88,27 @@ def photos(filename):
 
 @app.route("/edited_photos/<filename>")
 def edited_photos(filename):
+    # Serve edited photo with a correct mimetype based on actual file contents.
+    path = os.path.join(EDITED_DIR, filename)
+    if not os.path.exists(path):
+        return send_from_directory(EDITED_DIR, filename)
+
+    try:
+        img = Image.open(path)
+        fmt = (img.format or '').upper()
+        if fmt == 'JPEG' or fmt == 'JPG':
+            mimetype = 'image/jpeg'
+        elif fmt == 'PNG':
+            mimetype = 'image/png'
+        elif fmt == 'HEIC' or fmt == 'HEIF':
+            mimetype = 'image/heif'
+        else:
+            mimetype = 'application/octet-stream'
+    except Exception:
+        mimetype = None
+
+    if mimetype:
+        return send_file(path, mimetype=mimetype)
     return send_from_directory(EDITED_DIR, filename)
 
 
@@ -183,8 +205,18 @@ def edit(filename):
                 img = ImageOps.exif_transpose(img)
                 img = img.crop((x, y, x + width, y + height))
 
-                # save cropped image into the edited folder
-                img.save(edited_path)
+                # save cropped image into the edited folder (resize to display size and compress)
+                try:
+                    img = img.convert("RGB")
+                    img = img.resize((DISPLAY_WIDTH, DISPLAY_HEIGHT), Image.LANCZOS)
+                    ext = os.path.splitext(filename)[1].lower()
+                    if ext == '.png':
+                        img.save(edited_path, format='PNG', optimize=True)
+                    else:
+                        img.save(edited_path, format='JPEG', quality=85, optimize=True)
+                except Exception:
+                    img.save(edited_path)
+
                 generate_thumbnail(filename, force=True)
 
                 return redirect(url_for('edit', filename=filename))
