@@ -75,15 +75,44 @@ def gallery():
 
 @app.route("/delete/<filename>")
 def delete(filename):
-    path = os.path.join(PHOTO_DIR, filename)
-    if os.path.exists(path):
-        os.remove(path)
+    # Delete original, edited, and thumbnail for this filename.
+    photo_path = os.path.join(PHOTO_DIR, filename)
+    edited_path = os.path.join(EDITED_DIR, filename)
+    thumb_path = os.path.join(THUMB_DIR, thumbnail_path(filename))
+
+    for path in (photo_path, edited_path, thumb_path):
+        if os.path.exists(path):
+            try:
+                os.remove(path)
+            except Exception as e:
+                app.logger.warning(f"Failed to remove {path}: {e}")
+
     return redirect(url_for("gallery"))
 
 
 @app.route("/photos/<filename>")
 def photos(filename):
     return send_from_directory(PHOTO_DIR, filename)
+
+@app.route("/view/<filename>")
+def view_photo(filename):
+    src_path = os.path.join(PHOTO_DIR, filename)
+    edited_path = os.path.join(EDITED_DIR, filename)
+    thumb_filename = thumbnail_path(filename)
+    thumb_path = os.path.join(THUMB_DIR, thumb_filename)
+
+    if not os.path.exists(src_path):
+        return "Photo not found", 404
+
+    return render_template(
+        "view.html",
+        filename=filename,
+        original_url=url_for("photos", filename=filename),
+        edited_exists=os.path.exists(edited_path),
+        edited_url=url_for("edited_photos", filename=filename),
+        thumb_hash=hash_filename(filename),
+        thumb_url=url_for("static", filename=f"thumbnails/{thumb_filename}"),
+    )
 
 
 @app.route("/edited_photos/<filename>")

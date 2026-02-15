@@ -1,0 +1,34 @@
+  {% extends "base.html" %}
+
+  {% block content %}
+  <div class="space-y-8">
+    <h2 class="text-2xl font-semibold">View Photo</h2>
+
+    <div class="bg-white rounded shadow p-4">
+      <h3 class="text-lg font-semibold mb-1">Original</h3>
+      <p class="text-sm text-gray-600 mb-3">name: {{ filename }}</p>
+      <img src="{{ original_url }}" alt="Original photo" class="w-full max-w-3xl object-contain
+  bg-gray-100 rounded">
+    </div>
+
+    {% if edited_exists %}
+    <div class="bg-white rounded shadow p-4">
+      <h3 class="text-lg font-semibold mb-1">Edited</h3>
+      <p class="text-sm text-gray-600 mb-3">name: {{ filename }}</p>
+      <img src="{{ edited_url }}" alt="Edited photo" class="w-full max-w-3xl object-contain bg-
+  gray-100 rounded">
+    </div>
+    {% endif %}
+
+    <div class="bg-white rounded shadow p-4">
+      <h3 class="text-lg font-semibold mb-1">Thumbnail</h3>
+      <p class="text-sm text-gray-600 mb-3">hash: {{ thumb_hash }}</p>
+      <img src="{{ thumb_url }}" alt="Thumbnail image" class="w-full max-w-xl object-contain bg-
+  gray-100 rounded">
+    </div>
+
+    <div>
+      <a href="{{ url_for('gallery') }}" class="text-blue-600 hover:underline">Back to Gallery</a>
+    </div>
+  </div>
+  {% endblock %}

@@ -9,7 +9,10 @@
       class="w-full object-contain bg-gray-200"
     >
     <div class="flex justify-between mt-1">
-      <a href="{{ url_for('edit', filename=img) }}">Edit</a>
+      <div class="space-x-2">
+        <a href="{{ url_for('view_photo', filename=img) }}">View</a>
+        <a href="{{ url_for('edit', filename=img) }}">Edit</a>
+      </div>
       <a
         href="{{ url_for('delete', filename=img) }}"
         class="text-red-600 text-xs hover:underline"
